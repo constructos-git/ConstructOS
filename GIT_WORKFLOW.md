@@ -111,6 +111,52 @@ git pull origin main
 2. **Quick edits**: Use GitHub Mobile app or GitHub.dev
 3. **Full access**: Use remote desktop to your Mac
 
+## Authentication Setup
+
+### Option 1: Personal Access Token (Recommended)
+
+1. Go to GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
+2. Generate a new token with `repo` scope
+3. Use the token as your password when pushing
+
+```bash
+# Push will prompt for username and token
+git push origin main
+# Username: constructos-git
+# Password: <your-personal-access-token>
+```
+
+### Option 2: SSH Keys (More Secure)
+
+```bash
+# Generate SSH key (if you don't have one)
+ssh-keygen -t ed25519 -C "your-email@example.com"
+
+# Add to SSH agent
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_ed25519
+
+# Copy public key
+cat ~/.ssh/id_ed25519.pub
+
+# Add to GitHub: Settings → SSH and GPG keys → New SSH key
+
+# Update remote to use SSH
+git remote set-url origin git@github.com:constructos-git/ConstructOS.git
+```
+
+### Option 3: GitHub CLI
+
+```bash
+# Install GitHub CLI
+brew install gh
+
+# Authenticate
+gh auth login
+
+# This will set up authentication automatically
+```
+
 ## Troubleshooting
 
 ### If auto-push fails:
@@ -123,6 +169,12 @@ git push origin main
 
 # Check authentication (may need GitHub token)
 git config --global credential.helper osxkeychain
+
+# If using HTTPS, you may need to update credentials
+git credential-osxkeychain erase
+host=github.com
+protocol=https
+# Press Enter twice, then try push again
 ```
 
 ### If hooks don't run:
