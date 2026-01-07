@@ -20,7 +20,11 @@
     "audit:ribbon": "echo 'Ribbon check placeholder'",
     "cache:health": "echo 'Cache health check placeholder'",
     "migrate": "node scripts/run-migrations-simple.js",
-    "migrate:setup": "node scripts/setup-migration-rpc.js"
+    "migrate:setup": "node scripts/setup-migration-rpc.js",
+    "git:commit": "./scripts/auto-commit.sh",
+    "git:status": "git status",
+    "git:push": "git push origin main",
+    "git:pull": "git pull origin main"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
