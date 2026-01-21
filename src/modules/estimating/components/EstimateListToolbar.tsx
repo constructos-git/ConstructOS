@@ -1,7 +1,7 @@
-import { List, Grid, Table } from 'lucide-react';
+import { List, Grid, Table, LayoutGrid } from 'lucide-react';
 import Button from '@/components/ui/Button';
 
-export type ViewType = 'list' | 'kanban' | 'table';
+export type ViewType = 'list' | 'kanban' | 'table' | 'grid';
 
 export function EstimateListToolbar({
   viewType,
@@ -30,6 +30,15 @@ export function EstimateListToolbar({
         >
           <Grid className="h-4 w-4 mr-1" />
           Kanban
+        </Button>
+        <Button
+          variant={viewType === 'grid' ? 'primary' : 'ghost'}
+          size="sm"
+          onClick={() => onViewChange('grid')}
+          className="h-8 px-3"
+        >
+          <LayoutGrid className="h-4 w-4 mr-1" />
+          Grid
         </Button>
         <Button
           variant={viewType === 'table' ? 'primary' : 'ghost'}

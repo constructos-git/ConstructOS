@@ -18,6 +18,9 @@ interface KanbanBoardProps {
   onViewOpportunity?: (opportunity: Opportunity) => void;
   onAddOpportunity?: (stage: OpportunityStage) => void;
   onKanbanSettings?: () => void;
+  onMoveToLost?: (opportunity: Opportunity) => void; // Called when opportunity is moved to "lost" stage
+  onCreateProject?: (opportunity: Opportunity) => void; // Called when "Create Project" button is clicked on won opportunity
+  onArchiveWon?: (opportunity: Opportunity) => void; // Called when "Archive" button is clicked on won opportunity
   autoScroll?: boolean;
   scrollContainerRef?: React.RefObject<HTMLDivElement>;
 }
@@ -79,6 +82,9 @@ export default function KanbanBoard({
   onDeleteOpportunity,
   onViewOpportunity,
   onAddOpportunity,
+  onMoveToLost,
+  onCreateProject,
+  onArchiveWon,
   autoScroll: _autoScroll = true,
   scrollContainerRef: _scrollContainerRef,
 }: KanbanBoardProps) {
@@ -104,7 +110,26 @@ export default function KanbanBoard({
     const newStage = destination.droppableId as OpportunityStage;
     const newPosition = destination.index;
 
-    // Call the move handler
+    // Find the opportunity being moved
+    const opportunity = columns
+      .flatMap((col) => col.opportunities)
+      .find((opp) => opp.id === draggableId);
+
+    if (!opportunity) {
+      // If we can't find the opportunity, just move it normally
+      onMoveOpportunity(draggableId, newStage, newPosition);
+      return;
+    }
+
+    // Intercept moves to "lost" stage
+    if (newStage === 'lost' && onMoveToLost) {
+      onMoveToLost(opportunity);
+      return; // Don't move yet - let the modal handle it
+    }
+
+    // For "won" stage, allow the move to happen immediately
+    // The card will show buttons to create project or archive
+    // For all other moves, proceed normally
     onMoveOpportunity(draggableId, newStage, newPosition);
   };
 
@@ -293,7 +318,7 @@ export default function KanbanBoard({
                         )}
                       </div>
                     </CardHeader>
-                    <CardContent className="flex-1 overflow-y-auto space-y-3 min-h-[200px] scrollbar-thin">
+                    <CardContent className="flex-1 space-y-3 min-h-[200px]">
                       {sortedOpportunities.length === 0 && snapshot.isDraggingOver && (
                         <DropIndicator isVisible={true} />
                       )}
@@ -303,9 +328,8 @@ export default function KanbanBoard({
                             <div
                               ref={provided.innerRef}
                               {...provided.draggableProps}
-                              {...provided.dragHandleProps}
                               className={cn(
-                                'relative transition-all cursor-grab active:cursor-grabbing select-none',
+                                'relative transition-all select-none',
                                 snapshot.isDragging && 'opacity-30'
                               )}
                               style={{
@@ -321,6 +345,9 @@ export default function KanbanBoard({
                                 onEdit={onEditOpportunity}
                                 onDelete={onDeleteOpportunity}
                                 onView={onViewOpportunity}
+                                onCreateProject={onCreateProject}
+                                onArchiveWon={onArchiveWon}
+                                dragHandleProps={provided.dragHandleProps}
                               />
                             </div>
                           )}

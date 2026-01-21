@@ -14,7 +14,9 @@ import Clients from '@/pages/Clients';
 import Contractors from '@/pages/Contractors';
 import Consultants from '@/pages/Consultants';
 import Opportunities from '@/pages/Opportunities';
+import OpportunityArchive from '@/pages/OpportunityArchive';
 import Projects from '@/pages/Projects';
+import ProjectDetail from '@/pages/ProjectDetail';
 import Invoices from '@/pages/Invoices';
 import Estimates from '@/pages/Estimates';
 import Messages from '@/pages/Messages';
@@ -25,6 +27,8 @@ import Financial from '@/pages/Financial';
 import Integrations from '@/pages/Integrations';
 import Notes from '@/pages/Notes';
 import Calendar from '@/pages/Calendar';
+import Roadmap from '@/pages/Roadmap';
+import EstimatingDashboard from '@/pages/EstimatingDashboard';
 import { estimatingRoutes } from '@/modules/estimating/estimating.routes';
 import { estimatingSharedRoutes } from '@/modules/estimating/estimating.sharedRoutes';
 import EstimateBuilderAIPage from '@/modules/EstimateBuilderAI/pages/EstimateBuilderAIPage';
@@ -55,8 +59,11 @@ function App() {
                   <Route path="/contacts/contractors" element={<Contractors />} />
                   <Route path="/contacts/consultants" element={<Consultants />} />
                   <Route path="/opportunities" element={<Opportunities />} />
+                  <Route path="/opportunities/archive" element={<OpportunityArchive />} />
                   <Route path="/projects" element={<Projects />} />
+                  <Route path="/projects/:id" element={<ProjectDetail />} />
                   <Route path="/invoices" element={<Invoices />} />
+                  <Route path="/estimating/dashboard" element={<EstimatingDashboard />} />
                   <Route path="/financial/estimates" element={<Estimates />} />
                   {estimatingRoutes.map((route) => (
                     <Route key={route.path} path={route.path} element={route.element} />
@@ -70,6 +77,7 @@ function App() {
                   <Route path="/activity" element={<Activity />} />
                   <Route path="/financial" element={<Financial />} />
                   <Route path="/integrations" element={<Integrations />} />
+                  <Route path="/roadmap" element={<Roadmap />} />
                   <Route path="/permissions" element={<Permissions />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="*" element={<Navigate to="/" replace />} />

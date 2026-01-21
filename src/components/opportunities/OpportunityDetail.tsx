@@ -1,4 +1,4 @@
-import { Edit, Calendar, User, Building2, Tag, DollarSign, Percent, Target } from 'lucide-react';
+import { Edit, Calendar, User, Building2, Tag, PoundSterling, Percent, Target, MapPin, Navigation } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
@@ -33,6 +33,38 @@ export default function OpportunityDetail({
     if (probability >= 50) return 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/20';
     if (probability >= 25) return 'text-orange-600 bg-orange-100 dark:bg-orange-900/20';
     return 'text-red-600 bg-red-100 dark:bg-red-900/20';
+  };
+
+  const getFullAddress = (opp: Opportunity): string => {
+    const parts = [
+      opp.addressLine1,
+      opp.addressLine2,
+      opp.addressLine3,
+      opp.townCity,
+      opp.county,
+      opp.postcode,
+    ].filter(Boolean);
+    return parts.join(', ');
+  };
+
+  const getGoogleMapsUrl = (address: string): string => {
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+    if (apiKey) {
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}&key=${apiKey}`;
+    }
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+  };
+
+  const getAppleMapsUrl = (address: string): string => {
+    return `https://maps.apple.com/?q=${encodeURIComponent(address)}`;
+  };
+
+  const getWazeUrl = (address: string): string => {
+    return `https://waze.com/ul?q=${encodeURIComponent(address)}`;
+  };
+
+  const hasAddress = (opp: Opportunity): boolean => {
+    return !!(opp.addressLine1 || opp.postcode || opp.townCity);
   };
 
   return (
@@ -79,7 +111,7 @@ export default function OpportunityDetail({
         <div className="grid gap-4 md:grid-cols-3">
           <div className="rounded-lg border p-4">
             <div className="flex items-center gap-2 text-muted-foreground mb-2">
-              <DollarSign className="h-4 w-4" />
+              <PoundSterling className="h-4 w-4" />
               <span className="text-sm font-medium">Value</span>
             </div>
             <p className="text-2xl font-bold">
@@ -158,6 +190,102 @@ export default function OpportunityDetail({
                     {tag}
                   </Badge>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Customer Address Section */}
+          {hasAddress(opportunity) && (
+            <div>
+              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                Customer Address
+              </h3>
+              <div className="space-y-4">
+                {/* Address Display */}
+                <div className="rounded-lg border p-4 bg-muted/30">
+                  <div className="text-sm space-y-1">
+                    {opportunity.addressLine1 && <p className="font-medium">{opportunity.addressLine1}</p>}
+                    {opportunity.addressLine2 && <p>{opportunity.addressLine2}</p>}
+                    {opportunity.addressLine3 && <p>{opportunity.addressLine3}</p>}
+                    {opportunity.townCity && <p>{opportunity.townCity}</p>}
+                    {opportunity.county && <p>{opportunity.county}</p>}
+                    {opportunity.postcode && <p className="font-semibold">{opportunity.postcode}</p>}
+                  </div>
+                </div>
+
+                {/* Map Embed */}
+                <div className="rounded-lg border overflow-hidden" style={{ height: '300px' }}>
+                  {(() => {
+                    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+                    const address = getFullAddress(opportunity);
+                    if (apiKey) {
+                      return (
+                        <iframe
+                          width="100%"
+                          height="100%"
+                          style={{ border: 0 }}
+                          loading="lazy"
+                          allowFullScreen
+                          referrerPolicy="no-referrer-when-downgrade"
+                          src={`https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${encodeURIComponent(address)}`}
+                        />
+                      );
+                    } else {
+                      return (
+                        <div className="w-full h-full flex items-center justify-center bg-muted">
+                          <div className="text-center p-4">
+                            <MapPin className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                            <p className="text-sm text-muted-foreground mb-2">
+                              Google Maps API key not configured
+                            </p>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => window.open(getGoogleMapsUrl(address), '_blank')}
+                            >
+                              View on Google Maps
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    }
+                  })()}
+                </div>
+
+                {/* Directions Buttons */}
+                <div>
+                  <h4 className="text-xs font-semibold mb-2 flex items-center gap-2">
+                    <Navigation className="h-3 w-3" />
+                    Get Directions
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(getGoogleMapsUrl(getFullAddress(opportunity)), '_blank')}
+                    >
+                      <MapPin className="h-3 w-3 mr-2" />
+                      Google Maps
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(getAppleMapsUrl(getFullAddress(opportunity)), '_blank')}
+                    >
+                      <MapPin className="h-3 w-3 mr-2" />
+                      Apple Maps
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(getWazeUrl(getFullAddress(opportunity)), '_blank')}
+                    >
+                      <MapPin className="h-3 w-3 mr-2" />
+                      Waze
+                    </Button>
+                  </div>
+                </div>
               </div>
             </div>
           )}

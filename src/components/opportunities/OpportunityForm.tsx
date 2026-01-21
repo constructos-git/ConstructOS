@@ -5,6 +5,8 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Textarea from '@/components/ui/Textarea';
 import Select from '@/components/ui/Select';
+import { useCompaniesStore } from '@/stores/companiesStore';
+import { useContactsStore } from '@/stores/contactsStore';
 import type { Opportunity, OpportunityStage } from '@/types/opportunities';
 
 interface OpportunityFormProps {
@@ -41,10 +43,22 @@ export default function OpportunityForm({
   opportunity,
   initialStage,
 }: OpportunityFormProps) {
+  const { companies, fetchCompanies } = useCompaniesStore();
+  const { contacts, fetchContacts } = useContactsStore();
+  
+  useEffect(() => {
+    if (isOpen) {
+      fetchCompanies();
+      fetchContacts();
+    }
+  }, [isOpen, fetchCompanies, fetchContacts]);
+
   const [formData, setFormData] = useState({
     title: '',
     company: '',
+    companyId: '',
     contact: '',
+    contactId: '',
     value: '',
     currency: 'GBP',
     stage: (initialStage || 'lead') as OpportunityStage,
@@ -54,14 +68,24 @@ export default function OpportunityForm({
     description: '',
     assignedTo: '',
     tags: [] as string[],
+    addressLine1: '',
+    addressLine2: '',
+    addressLine3: '',
+    townCity: '',
+    county: '',
+    postcode: '',
   });
 
   useEffect(() => {
     if (opportunity) {
+      const company = companies.find(c => c.name === opportunity.company);
+      const contact = contacts.find(c => `${c.first_name} ${c.last_name}` === opportunity.contact);
       setFormData({
         title: opportunity.title,
         company: opportunity.company,
+        companyId: company?.id || '',
         contact: opportunity.contact || '',
+        contactId: contact?.id || '',
         value: opportunity.value.toString(),
         currency: opportunity.currency,
         stage: opportunity.stage,
@@ -73,6 +97,12 @@ export default function OpportunityForm({
         description: opportunity.description || '',
         assignedTo: opportunity.assignedTo || '',
         tags: opportunity.tags || [],
+        addressLine1: opportunity.addressLine1 || '',
+        addressLine2: opportunity.addressLine2 || '',
+        addressLine3: opportunity.addressLine3 || '',
+        townCity: opportunity.townCity || '',
+        county: opportunity.county || '',
+        postcode: opportunity.postcode || '',
       });
     } else {
       setFormData({
@@ -88,6 +118,12 @@ export default function OpportunityForm({
         description: '',
         assignedTo: '',
         tags: [],
+        addressLine1: '',
+        addressLine2: '',
+        addressLine3: '',
+        townCity: '',
+        county: '',
+        postcode: '',
       });
     }
   }, [opportunity, initialStage]);
@@ -114,6 +150,12 @@ export default function OpportunityForm({
       description: formData.description || undefined,
       assignedTo: formData.assignedTo || undefined,
       tags: formData.tags.length > 0 ? formData.tags : undefined,
+      addressLine1: formData.addressLine1 || undefined,
+      addressLine2: formData.addressLine2 || undefined,
+      addressLine3: formData.addressLine3 || undefined,
+      townCity: formData.townCity || undefined,
+      county: formData.county || undefined,
+      postcode: formData.postcode || undefined,
     });
     onClose();
   };
@@ -153,21 +195,45 @@ export default function OpportunityForm({
             placeholder="e.g., Office Renovation Project"
             required
           />
-          <Input
+          <Select
             label="Company *"
-            value={formData.company}
-            onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-            placeholder="Company name"
-            required
+            value={formData.companyId}
+            onChange={(e) => {
+              const company = companies.find(c => c.id === e.target.value);
+              setFormData({ 
+                ...formData, 
+                companyId: e.target.value,
+                company: company?.name || '',
+              });
+            }}
+            options={[
+              { value: '', label: 'Select company...' },
+              ...companies.map(c => ({ value: c.id, label: c.name })),
+            ]}
           />
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
           <Input
             label="Contact"
-            value={formData.contact}
-            onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
-            placeholder="Contact person"
+            value={formData.contactId}
+            onChange={(e) => {
+              const contact = contacts.find(c => c.id === e.target.value);
+              setFormData({ 
+                ...formData, 
+                contactId: e.target.value,
+                contact: contact ? `${contact.first_name} ${contact.last_name}` : '',
+              });
+            }}
+            options={[
+              { value: '', label: 'Select contact...' },
+              ...contacts
+                .filter(c => !formData.companyId || c.company_uuid === formData.companyId)
+                .map(c => ({ 
+                  value: c.id, 
+                  label: `${c.first_name} ${c.last_name}${c.company ? ` (${c.company.name})` : ''}` 
+                })),
+            ]}
           />
           <Input
             label="Assigned To"
@@ -247,6 +313,51 @@ export default function OpportunityForm({
           placeholder="Additional details about this opportunity..."
           rows={4}
         />
+
+        {/* Address Section */}
+        <div className="pt-4 border-t">
+          <h3 className="text-sm font-semibold mb-4">Customer Address</h3>
+          <div className="space-y-4">
+            <Input
+              label="Address Line 1"
+              value={formData.addressLine1}
+              onChange={(e) => setFormData({ ...formData, addressLine1: e.target.value })}
+              placeholder="Street address"
+            />
+            <Input
+              label="Address Line 2"
+              value={formData.addressLine2}
+              onChange={(e) => setFormData({ ...formData, addressLine2: e.target.value })}
+              placeholder="Apartment, suite, etc."
+            />
+            <Input
+              label="Address Line 3"
+              value={formData.addressLine3}
+              onChange={(e) => setFormData({ ...formData, addressLine3: e.target.value })}
+              placeholder="Additional address info"
+            />
+            <div className="grid gap-4 md:grid-cols-2">
+              <Input
+                label="Town/City"
+                value={formData.townCity}
+                onChange={(e) => setFormData({ ...formData, townCity: e.target.value })}
+                placeholder="Town or city"
+              />
+              <Input
+                label="County"
+                value={formData.county}
+                onChange={(e) => setFormData({ ...formData, county: e.target.value })}
+                placeholder="County"
+              />
+            </div>
+            <Input
+              label="Postcode"
+              value={formData.postcode}
+              onChange={(e) => setFormData({ ...formData, postcode: e.target.value })}
+              placeholder="Postcode"
+            />
+          </div>
+        </div>
       </form>
     </Modal>
   );

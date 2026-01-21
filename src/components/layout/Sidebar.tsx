@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Building2,
@@ -22,6 +22,7 @@ import {
   Briefcase,
   Receipt,
   Calculator,
+  Map,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSidebarStore } from '@/stores/sidebarStore';
@@ -42,6 +43,7 @@ const navItems: NavItem[] = [
     label: 'Contacts',
     icon: Users,
     children: [
+      { label: 'All Contacts', path: '/contacts', icon: Users },
       { label: 'Companies', path: '/companies', icon: Building2 },
       { label: 'Clients', path: '/contacts/clients', icon: UserCheck },
       { label: 'Contractors', path: '/contacts/contractors', icon: HardHat },
@@ -52,6 +54,7 @@ const navItems: NavItem[] = [
   { label: 'Projects', path: '/projects', icon: FolderKanban },
   {
     label: 'Estimating',
+    path: '/estimating/dashboard',
     icon: Calculator,
     children: [
       { label: 'Estimate Builder', path: '/estimating', icon: Calculator },
@@ -70,6 +73,7 @@ const navItems: NavItem[] = [
   { label: 'Email', path: '/email', icon: Mail },
   { label: 'Knowledge Base', path: '/knowledge-base', icon: BookOpen },
   { label: 'Activity Log', path: '/activity', icon: Activity },
+  { label: 'Roadmap', path: '/roadmap', icon: Map },
   {
     label: 'Settings',
     icon: Settings,
@@ -83,18 +87,26 @@ const navItems: NavItem[] = [
 
 function NavItemComponent({ item, isCollapsed }: { item: NavItem; isCollapsed: boolean }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const { setCollapsed } = useSidebarStore();
   const [isExpanded, setIsExpanded] = useState(() => {
-    // Auto-expand if any child is active
+    // Auto-expand if any child is exactly active or if parent path is exactly active
     if (item.children) {
-      return item.children.some((child) => child.path && location.pathname.startsWith(child.path));
+      const hasActiveChild = item.children.some((child) => child.path && location.pathname === child.path);
+      const isParentActive = item.path && location.pathname === item.path;
+      return hasActiveChild || isParentActive || false;
     }
     return false;
   });
 
+  // Check if any child is EXACTLY active (not just starts with)
   const hasActiveChild = item.children?.some(
     (child) => child.path && location.pathname === child.path
   );
+  
+  // Check if the parent item's path is EXACTLY active (not just starts with)
+  // This ensures that when on the parent path, children are NOT highlighted
+  const isParentActive = item.path && location.pathname === item.path;
 
   if (item.children) {
     // When collapsed, show only icon with tooltip
@@ -103,14 +115,18 @@ function NavItemComponent({ item, isCollapsed }: { item: NavItem; isCollapsed: b
         <Tooltip content={item.label} position="right">
           <button
             onClick={() => {
-              // Expand sidebar when clicking parent item in collapsed state
-              setCollapsed(false);
-              setIsExpanded(true);
+              // Navigate to parent path if it exists, otherwise expand sidebar
+              if (item.path) {
+                navigate(item.path);
+              } else {
+                setCollapsed(false);
+                setIsExpanded(true);
+              }
             }}
             className={cn(
               'flex w-full items-center justify-center rounded-lg p-2 text-sm font-medium transition-colors',
               'hover:bg-accent hover:text-accent-foreground',
-              hasActiveChild
+              hasActiveChild || isParentActive
                 ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400'
                 : 'text-muted-foreground'
             )}
@@ -123,35 +139,67 @@ function NavItemComponent({ item, isCollapsed }: { item: NavItem; isCollapsed: b
 
     return (
       <div>
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className={cn(
-            'flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-            'hover:bg-accent hover:text-accent-foreground',
-            hasActiveChild
-              ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400'
-              : 'text-muted-foreground'
-          )}
+        <NavLink
+          to={item.path || '#'}
+          onClick={(e) => {
+            // If clicking the chevron, toggle expansion instead of navigating
+            if ((e.target as HTMLElement).closest('.chevron-container')) {
+              e.preventDefault();
+              setIsExpanded(!isExpanded);
+            } else if (!item.path) {
+              // If no path, just toggle expansion
+              e.preventDefault();
+              setIsExpanded(!isExpanded);
+            } else {
+              // If navigating, ensure dropdown is expanded
+              if (!isExpanded) {
+                setIsExpanded(true);
+              }
+            }
+            // Otherwise, let NavLink handle navigation
+          }}
+          className={() =>
+            cn(
+              'flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+              'hover:bg-accent hover:text-accent-foreground',
+              // Only highlight parent if it's exactly active AND no child is active
+              (isParentActive && !hasActiveChild)
+                ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400'
+                : 'text-muted-foreground'
+            )
+          }
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-1">
             <item.icon className="h-5 w-5" />
             <span>{item.label}</span>
           </div>
-          {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-        </button>
+          <div
+            className="chevron-container cursor-pointer flex-shrink-0"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsExpanded(!isExpanded);
+            }}
+          >
+            {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          </div>
+        </NavLink>
         {isExpanded && (
           <div className="ml-4 mt-1 space-y-1 border-l-2 border-border pl-2">
             {item.children.map((child) => {
               const ChildIcon = child.icon;
+              // Check if this child is exactly active (not just starts with)
+              // Also ensure parent path is not active when checking child
+              const isChildExactlyActive = child.path && location.pathname === child.path && !isParentActive;
               return (
                 <NavLink
                   key={child.path}
                   to={child.path || '#'}
-                  className={({ isActive }) =>
+                  className={() =>
                     cn(
                       'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                       'hover:bg-accent hover:text-accent-foreground',
-                      isActive
+                      isChildExactlyActive
                         ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400'
                         : 'text-muted-foreground'
                     )

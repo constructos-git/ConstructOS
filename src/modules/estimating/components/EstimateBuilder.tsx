@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery, useMutation, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
+import { ArrowLeft } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { usePermissionsStore } from '@/stores/permissionsStore';
 import { estimatesRepo } from '../data/estimates.repo';
@@ -54,6 +55,7 @@ const SHARED_COMPANY_ID = '00000000-0000-0000-0000-000000000000';
 
 function EstimateBuilderInner() {
   const { estimateId } = useParams();
+  const navigate = useNavigate();
   const { currentUser } = usePermissionsStore();
   // Try to get from permissions store, fallback to shared ID
   const companyId = (currentUser as any)?.companyId || SHARED_COMPANY_ID;
@@ -310,13 +312,24 @@ function EstimateBuilderInner() {
 
   return (
       <div className="space-y-4">
+        <div className="flex items-center gap-2 mb-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/estimating/dashboard')}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Button>
+        </div>
         <Card className="p-3 space-y-2">
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className="text-xs text-slate-500">Estimate</div>
               <div className="text-base font-semibold">{estimate.title}</div>
               <div className="text-xs text-slate-500">
-                Status: {estimate.status} • Workflow: {estimate.workflow_status || 'draft'}
+                Status: {estimate.status}
               </div>
             </div>
             <div className="flex gap-2">
@@ -326,7 +339,7 @@ function EstimateBuilderInner() {
           <WorkflowStatusControl
             companyId={companyId}
             estimateId={estimateId as string}
-            currentStatus={estimate.workflow_status || 'draft'}
+            currentStatus={estimate.status}
             onStatusChanged={() => estimateQ.refetch()}
           />
         </Card>

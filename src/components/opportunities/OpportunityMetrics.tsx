@@ -1,4 +1,4 @@
-import { TrendingUp, Target, DollarSign, Percent } from 'lucide-react';
+import { TrendingUp, Target, PoundSterling, Percent } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import type { OpportunityMetrics } from '@/types/opportunities';
 
@@ -36,7 +36,7 @@ export default function OpportunityMetrics({ metrics }: OpportunityMetricsProps)
         <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Total Pipeline Value</CardTitle>
           <div className="rounded-full bg-gradient-to-br from-teal-500 to-accent-500 p-2">
-            <DollarSign className="h-4 w-4 text-white" />
+            <PoundSterling className="h-4 w-4 text-white" />
           </div>
         </CardHeader>
         <CardContent className="relative">

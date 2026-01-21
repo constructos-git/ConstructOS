@@ -123,7 +123,14 @@ export default function Dropdown({ trigger, children, align = 'right', onClose, 
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <div onClick={handleTriggerClick} onMouseDown={(e) => e.stopPropagation()}>
+      <div 
+        onClick={handleTriggerClick} 
+        onMouseDown={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+        }}
+        style={{ pointerEvents: 'auto' }}
+      >
         {trigger}
       </div>
       {isOpen &&

@@ -8,6 +8,9 @@ interface OpportunitiesState {
   updateOpportunity: (id: string, updates: Partial<Opportunity>) => void;
   deleteOpportunity: (id: string) => void;
   moveOpportunity: (id: string, newStage: OpportunityStage, newPosition: number) => void;
+  archiveOpportunity: (id: string, reason?: 'lost' | 'won') => void;
+  restoreOpportunity: (id: string) => void;
+  getArchivedOpportunities: (reason?: 'lost' | 'won') => Opportunity[];
   getMetrics: () => OpportunityMetrics;
   getColumns: () => KanbanColumn[];
 }
@@ -32,6 +35,9 @@ const deserializeOpportunities = (opportunities: any[]): Opportunity[] => {
     createdAt: opp.createdAt ? new Date(opp.createdAt) : new Date(),
     updatedAt: opp.updatedAt ? new Date(opp.updatedAt) : new Date(),
     lastActivity: opp.lastActivity ? new Date(opp.lastActivity) : new Date(),
+    archivedAt: opp.archivedAt ? new Date(opp.archivedAt) : undefined,
+    isArchived: opp.isArchived || false,
+    archiveReason: opp.archiveReason,
   }));
 };
 
@@ -280,11 +286,55 @@ export const useOpportunitiesStore = create<OpportunitiesState>()(
         };
       },
 
+      archiveOpportunity: (id, reason?: 'lost' | 'won') => {
+        set((state) => {
+          const opportunity = state.opportunities.find((opp) => opp.id === id);
+          const archiveReason = reason || (opportunity?.stage === 'won' ? 'won' : 'lost');
+          return {
+            opportunities: state.opportunities.map((opp) =>
+              opp.id === id
+                ? { ...opp, isArchived: true, archivedAt: new Date(), archiveReason, updatedAt: new Date() }
+                : opp
+            ),
+          };
+        });
+      },
+
+      restoreOpportunity: (id) => {
+        set((state) => ({
+          opportunities: state.opportunities.map((opp) =>
+            opp.id === id
+              ? { ...opp, isArchived: false, archivedAt: undefined, archiveReason: undefined, updatedAt: new Date() }
+              : opp
+          ),
+        }));
+      },
+
+      getArchivedOpportunities: (reason?: 'lost' | 'won') => {
+        const { opportunities } = get();
+        return opportunities
+          .filter((opp) => {
+            if (!opp.isArchived) return false;
+            if (reason) return opp.archiveReason === reason;
+            return true;
+          })
+          .sort((a, b) => {
+            const aDate = a.archivedAt || a.updatedAt;
+            const bDate = b.archivedAt || b.updatedAt;
+            if (!aDate || !bDate) return 0;
+            const aTime = aDate instanceof Date ? aDate.getTime() : new Date(aDate).getTime();
+            const bTime = bDate instanceof Date ? bDate.getTime() : new Date(bDate).getTime();
+            return bTime - aTime;
+          });
+      },
+
       getColumns: () => {
         const { opportunities } = get();
+        // Filter out archived opportunities from the kanban board
+        const activeOpportunities = opportunities.filter((opp) => !opp.isArchived);
         return defaultStages.map((stage) => ({
           ...stage,
-          opportunities: opportunities
+          opportunities: activeOpportunities
             .filter((opp) => opp.stage === stage.id)
             .sort((a, b) => a.position - b.position), // Sort by position
         }));
