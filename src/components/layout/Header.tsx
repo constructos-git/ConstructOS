@@ -18,6 +18,7 @@ import { supabase } from '@/lib/supabase';
 import Tooltip from '@/components/ui/Tooltip';
 import Button from '@/components/ui/Button';
 import Dropdown from '@/components/ui/Dropdown';
+import GlobalSearch from './GlobalSearch';
 
 export default function Header() {
   const { setMode, getEffectiveTheme } = useTheme();
@@ -83,15 +84,21 @@ export default function Header() {
 
   return (
     <header
-      className="sticky top-0 z-[100] w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
-      style={{ width: '100%', maxWidth: '100%', overflowX: 'hidden' }}
+      className="sticky top-0 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+      style={{ 
+        width: '100%', 
+        maxWidth: '100%', 
+        overflow: 'visible',
+        zIndex: 1000,
+        position: 'sticky'
+      }}
     >
       <div
         className="flex h-16 items-center justify-between px-6"
-        style={{ width: '100%', maxWidth: '100%' }}
+        style={{ width: '100%', maxWidth: '100%', position: 'relative' }}
       >
         <div className="flex items-center gap-2 flex-1 min-w-0">
-          {/* Left side can be used for search or breadcrumbs in the future */}
+          <GlobalSearch />
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           {/* Notes */}

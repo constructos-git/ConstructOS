@@ -45,18 +45,20 @@ export function WorkflowStatusControl({
   return (
     <div className="flex items-center gap-2">
       <span className="text-xs text-slate-500">Change status:</span>
-      <Select
-        value={currentStatus}
-        onChange={(e) => {
-          handleStatusChange(e.target.value as EstimateStatus);
-        }}
-        disabled={changing}
-        options={statusOptions.map((option) => ({
-          value: option.value,
-          label: option.label,
-        }))}
-        className="text-sm"
-      />
+      <div className="w-[140px]">
+        <Select
+          value={currentStatus}
+          onChange={(e) => {
+            handleStatusChange(e.target.value as EstimateStatus);
+          }}
+          disabled={changing}
+          options={statusOptions.map((option) => ({
+            value: option.value,
+            label: option.label,
+          }))}
+          className="text-sm"
+        />
+      </div>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { EstimatesPage } from './pages/EstimatesPage';
+import { EstimateBuilderPage } from './pages/EstimateBuilderPage';
 import { EstimateDetailPage } from './pages/EstimateDetailPage';
 import { EstimatingSettingsPage } from './components/settings/EstimatingSettingsPage';
 import { BrandPresetsPage } from './designer/BrandPresetsPage';
@@ -9,7 +10,7 @@ import { PdfThemesPage } from './components/settings/PdfThemesPage';
 export const estimatingRoutes = [
   {
     path: '/estimating',
-    element: <EstimatesPage />,
+    element: <EstimateBuilderPage />,
   },
   {
     path: '/estimating/:estimateId',

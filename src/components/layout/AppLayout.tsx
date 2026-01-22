@@ -26,7 +26,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
           style={{ width: '100%', maxWidth: '100%', overflowX: 'hidden' }}
         >
           <Header />
-          <main className="p-6 relative z-0" style={{ width: '100%', maxWidth: '100%', overflowX: 'hidden' }}>
+          <main className="p-6 relative" style={{ width: '100%', maxWidth: '100%', overflowX: 'hidden', zIndex: 1 }}>
             {children}
           </main>
         </div>

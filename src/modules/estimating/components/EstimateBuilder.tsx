@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { useQuery, useMutation, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Check, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { usePermissionsStore } from '@/stores/permissionsStore';
 import { estimatesRepo } from '../data/estimates.repo';
@@ -79,12 +79,75 @@ function EstimateBuilderInner() {
   const [revisionModalOpen, setRevisionModalOpen] = useState(false);
   const [openVersionId, setOpenVersionId] = useState<string | null>(null);
   const [recalculating, setRecalculating] = useState(false);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [titleValue, setTitleValue] = useState('');
+  const titleInputRef = useRef<HTMLInputElement>(null);
 
   const estimateQ = useQuery({
     queryKey: ['estimate', companyId, estimateId],
     queryFn: () => estimatesRepo.getById(estimateId as string),
     enabled: !!companyId && !!estimateId,
   });
+
+  // Update title value when estimate changes
+  useEffect(() => {
+    if (estimateQ.data?.title) {
+      setTitleValue(estimateQ.data.title);
+    }
+  }, [estimateQ.data?.title]);
+
+  // Focus input when editing starts
+  useEffect(() => {
+    if (isEditingTitle && titleInputRef.current) {
+      titleInputRef.current.focus();
+      titleInputRef.current.select();
+    }
+  }, [isEditingTitle]);
+
+  const updateTitleMutation = useMutation({
+    mutationFn: (newTitle: string) => estimatesRepo.update(estimateId as string, { title: newTitle }),
+    onSuccess: () => {
+      estimateQ.refetch();
+      setIsEditingTitle(false);
+    },
+    onError: (error) => {
+      console.error('Failed to update estimate title:', error);
+      alert('Failed to update estimate title. Please try again.');
+      setTitleValue(estimateQ.data?.title || '');
+    },
+  });
+
+  const handleTitleClick = () => {
+    if (!isEditingTitle) {
+      setIsEditingTitle(true);
+      setTitleValue(estimateQ.data?.title || '');
+    }
+  };
+
+  const handleTitleSave = () => {
+    const trimmedTitle = titleValue.trim();
+    if (trimmedTitle && trimmedTitle !== estimateQ.data?.title) {
+      updateTitleMutation.mutate(trimmedTitle);
+    } else {
+      setTitleValue(estimateQ.data?.title || '');
+      setIsEditingTitle(false);
+    }
+  };
+
+  const handleTitleCancel = () => {
+    setTitleValue(estimateQ.data?.title || '');
+    setIsEditingTitle(false);
+  };
+
+  const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleTitleSave();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      handleTitleCancel();
+    }
+  };
 
   const sectionsQ = useQuery({
     queryKey: ['estimateSections', companyId, estimateId],
@@ -327,7 +390,47 @@ function EstimateBuilderInner() {
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className="text-xs text-slate-500">Estimate</div>
-              <div className="text-base font-semibold">{estimate.title}</div>
+              {isEditingTitle ? (
+                <div className="flex items-center gap-2 mt-1">
+                  <input
+                    ref={titleInputRef}
+                    type="text"
+                    value={titleValue}
+                    onChange={(e) => setTitleValue(e.target.value)}
+                    onBlur={handleTitleSave}
+                    onKeyDown={handleTitleKeyDown}
+                    className="text-base font-semibold bg-background border border-primary rounded px-2 py-1"
+                    style={{ minWidth: '600px', maxWidth: '800px' }}
+                    disabled={updateTitleMutation.isPending}
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0"
+                    onClick={handleTitleSave}
+                    disabled={updateTitleMutation.isPending}
+                  >
+                    <Check className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0"
+                    onClick={handleTitleCancel}
+                    disabled={updateTitleMutation.isPending}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              ) : (
+                <div
+                  className="text-base font-semibold cursor-pointer hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                  onClick={handleTitleClick}
+                  title="Click to edit"
+                >
+                  {estimate.title}
+                </div>
+              )}
               <div className="text-xs text-slate-500">
                 Status: {estimate.status}
               </div>
