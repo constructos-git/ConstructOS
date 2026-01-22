@@ -107,11 +107,11 @@ export function AssignmentBar({
               <select
                 value={clientId || ''}
                 onChange={(e) => onClientChange(e.target.value || undefined)}
-                className="rounded-md border px-3 py-1 text-sm"
+                className="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
               >
-                <option value="">Select Client</option>
+                <option value="" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">Select Client</option>
                 {clients?.map((client) => (
-                  <option key={client.id} value={client.id}>
+                  <option key={client.id} value={client.id} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
                     {client.name}
                   </option>
                 ))}
@@ -131,9 +131,9 @@ export function AssignmentBar({
               <select
                 value={projectId || ''}
                 onChange={(e) => onProjectChange(e.target.value || undefined)}
-                className="rounded-md border px-3 py-1 text-sm"
+                className="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
               >
-                <option value="">Select Project</option>
+                <option value="" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">Select Project</option>
                 {/* Projects loaded from store if available */}
               </select>
               {projectId && (
@@ -153,11 +153,11 @@ export function AssignmentBar({
               <select
                 value={opportunityId || ''}
                 onChange={(e) => onOpportunityChange(e.target.value || undefined)}
-                className="rounded-md border px-3 py-1 text-sm"
+                className="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
               >
-                <option value="">Select Opportunity</option>
+                <option value="" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">Select Opportunity</option>
                 {opportunities.map((opp) => (
-                  <option key={opp.id} value={opp.id}>
+                  <option key={opp.id} value={opp.id} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
                     {opp.title || `Opportunity ${opp.id.slice(0, 8)}`}
                   </option>
                 ))}

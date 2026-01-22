@@ -37,7 +37,7 @@ export default function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
+      className="fixed inset-0 z-50 flex items-center justify-center pt-16 pb-4 px-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose();
@@ -48,7 +48,8 @@ export default function Modal({
       <div
         className={cn(
           'relative z-50 w-full bg-background rounded-lg shadow-lg',
-          'max-h-[90vh] overflow-hidden flex flex-col',
+          'border border-gray-200 dark:border-white/20',
+          'max-h-[85vh] overflow-hidden flex flex-col',
           {
             'max-w-sm': size === 'sm',
             'max-w-md': size === 'md',

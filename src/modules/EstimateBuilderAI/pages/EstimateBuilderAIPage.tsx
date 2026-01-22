@@ -3,7 +3,6 @@
 import { useState, useCallback } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TemplatePicker } from '../components/TemplatePicker';
-import { PropertyTypeStep } from '../components/PropertyTypeStep';
 import { WizardPage } from '../components/Wizard/WizardPage';
 import { InternalCostingEditor } from '../components/Editors/InternalCostingEditor';
 import { CustomerEstimateEditor } from '../components/Editors/CustomerEstimateEditor';
@@ -14,6 +13,10 @@ import { AssignmentBar } from '../components/Assignments/AssignmentBar';
 import { GeneratePOModal } from '../components/Assignments/GeneratePOModal';
 import { GenerateWOModal } from '../components/Assignments/GenerateWOModal';
 import { MockEstimateAIProvider } from '../ai/MockEstimateAIProvider';
+import { PlansChoiceScreen } from '../components/Plans/PlansChoiceScreen';
+import { PlansUploadPage } from '../components/Plans/PlansUploadPage';
+import { mapExtractedDataToAnswers } from '../utils/plansDataMapper';
+import type { ExtractedPlansData } from '../ai/plansAnalyzer';
 import { useCreateEstimate, useUpdateEstimate, useEstimate } from '../hooks/useEstimates';
 import { useCreateMeasurements, useMeasurements } from '../hooks/useMeasurements';
 import { useCreateRateSettings, useRateSettings } from '../hooks/useRateSettings';
@@ -29,7 +32,8 @@ import type {
 } from '../domain/types';
 import { Card, CardContent } from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
-import { ShoppingCart, Briefcase, History } from 'lucide-react';
+import { ShoppingCart, Briefcase, History, Settings } from 'lucide-react';
+import { SettingsModal } from '../components/Settings/SettingsModal';
 
 const SHARED_COMPANY_ID = '00000000-0000-0000-0000-000000000000';
 
@@ -44,9 +48,10 @@ const queryClient = new QueryClient({
 });
 
 type ViewState =
-  | { type: 'template-picker' }
-  | { type: 'property-type'; template: EstimateBuilderTemplate }
-  | { type: 'wizard'; template: EstimateBuilderTemplate; answers: Record<string, any>; propertyType?: string }
+  | { type: 'choice' }
+  | { type: 'plans-upload' }
+  | { type: 'template-picker'; prefillAnswers?: Record<string, any> }
+  | { type: 'wizard'; template: EstimateBuilderTemplate; answers: Record<string, any> }
   | {
       type: 'editor';
       estimateId: string;
@@ -61,7 +66,7 @@ type ViewState =
     };
 
 function EstimateBuilderAIPageInner() {
-  const [viewState, setViewState] = useState<ViewState>({ type: 'template-picker' });
+  const [viewState, setViewState] = useState<ViewState>({ type: 'choice' });
   const [isGenerating, setIsGenerating] = useState(false);
   const [showPOModal, setShowPOModal] = useState(false);
   const [showWOModal, setShowWOModal] = useState(false);
@@ -69,6 +74,7 @@ function EstimateBuilderAIPageInner() {
   const [currentEstimateId, setCurrentEstimateId] = useState<string | null>(null);
   const [answersSnapshot, setAnswersSnapshot] = useState<EstimateBrief | undefined>(undefined);
   const [regenerating, setRegenerating] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   const createEstimate = useCreateEstimate(SHARED_COMPANY_ID);
   const updateEstimate = useUpdateEstimate(SHARED_COMPANY_ID);
@@ -81,50 +87,33 @@ function EstimateBuilderAIPageInner() {
 
   const aiProvider = new MockEstimateAIProvider();
 
-  // Helper to determine if a template requires property type
-  const requiresPropertyType = (template: EstimateBuilderTemplate): boolean => {
-    // Property type is only relevant for:
-    // - Extension templates (single-storey, double-storey, wraparound, combination)
-    // - Loft conversion templates
-    // - Garage conversion templates
-    const extensionTemplates = [
-      'single-storey-extension',
-      'double-storey-extension',
-      'wraparound-extension',
-      'combination-extension',
-    ];
-    const conversionTemplates = ['loft-conversion', 'garage-conversion'];
-    
-    return extensionTemplates.includes(template.id) || conversionTemplates.includes(template.id);
-  };
-
   const handleTemplateSelect = (template: EstimateBuilderTemplate) => {
-    if (requiresPropertyType(template)) {
-      // Show property type step for relevant templates
-      setViewState({
-        type: 'property-type',
-        template,
-      });
-    } else {
-      // Skip property type step for refurbishment templates
-      setViewState({
-        type: 'wizard',
-        template,
-        answers: {},
-        propertyType: undefined,
-      });
-    }
+    setViewState({
+      type: 'wizard',
+      template,
+      answers: {},
+    });
   };
 
-  const handlePropertyTypeSelect = (propertyType: string) => {
-    if (viewState.type === 'property-type') {
-      setViewState({
-        type: 'wizard',
-        template: viewState.template,
-        answers: {},
-        propertyType,
-      });
-    }
+  const handlePlansContinue = (extractedData: ExtractedPlansData) => {
+    // Map extracted data to wizard answers
+    const answers = mapExtractedDataToAnswers(extractedData);
+    
+    // Get the default template (first one, or you could have a specific one for plans)
+    // For now, we'll use the template picker to let them choose
+    // But we could also auto-select a template based on the extracted data
+    setViewState({
+      type: 'template-picker',
+      prefillAnswers: answers,
+    });
+  };
+
+  const handleTemplateSelectWithPrefill = (template: EstimateBuilderTemplate, prefillAnswers?: Record<string, any>) => {
+    setViewState({
+      type: 'wizard',
+      template,
+      answers: prefillAnswers || {},
+    });
   };
 
 
@@ -140,10 +129,7 @@ function EstimateBuilderAIPageInner() {
   const handleGenerate = async (brief: EstimateBrief) => {
     if (viewState.type !== 'wizard') return;
 
-    // Include property type in brief only if it was provided (for relevant templates)
-    if (viewState.propertyType) {
-      brief.propertyType = viewState.propertyType;
-    }
+    // PropertyType is now part of answers, so it's already in the brief from buildEstimateBrief
 
     // Include measurements and rate settings in brief
     if (viewState.answers.measurements) {
@@ -552,39 +538,44 @@ function EstimateBuilderAIPageInner() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      {viewState.type === 'template-picker' && (
-        <TemplatePicker
-          onSelect={handleTemplateSelect}
-          onCancel={() => {
-            // Could navigate away or show confirmation
-          }}
+      {viewState.type === 'choice' && (
+        <PlansChoiceScreen
+          onChoosePlans={() => setViewState({ type: 'plans-upload' })}
+          onChooseScratch={() => setViewState({ type: 'template-picker' })}
         />
       )}
 
-      {viewState.type === 'property-type' && (
-        <PropertyTypeStep
-          onSelect={handlePropertyTypeSelect}
-          onBack={() => setViewState({ type: 'template-picker' })}
+      {viewState.type === 'plans-upload' && (
+        <PlansUploadPage
+          onBack={() => setViewState({ type: 'choice' })}
+          onContinue={handlePlansContinue}
+        />
+      )}
+
+      {viewState.type === 'template-picker' && (
+        <TemplatePicker
+          onSelect={(template) => {
+            const prefillAnswers = 'prefillAnswers' in viewState ? viewState.prefillAnswers : undefined;
+            handleTemplateSelectWithPrefill(template, prefillAnswers);
+          }}
+          onCancel={() => {
+            setViewState({ type: 'choice' });
+          }}
         />
       )}
 
       {viewState.type === 'wizard' && (
-        <WizardPage
-          template={viewState.template}
-          answers={{ 
-            ...viewState.answers, 
-            ...(viewState.propertyType && { propertyType: viewState.propertyType })
-          }}
-          onAnswersChange={handleAnswersChange}
-          onBack={() => {
-            if (requiresPropertyType(viewState.template)) {
-              setViewState({ type: 'property-type', template: viewState.template });
-            } else {
-              setViewState({ type: 'template-picker' });
-            }
-          }}
-          onGenerate={handleGenerate}
-        />
+        <>
+          <WizardPage
+            template={viewState.template}
+            answers={viewState.answers}
+            onAnswersChange={handleAnswersChange}
+            onBack={() => setViewState({ type: 'template-picker' })}
+            onGenerate={handleGenerate}
+            onOpenSettings={() => setShowSettings(true)}
+          />
+          <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
+        </>
       )}
 
       {viewState.type === 'editor' && (

@@ -83,13 +83,13 @@ export function ContentLibraryDrawer({
             <select
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value)}
-              className="w-full rounded-md border px-3 py-2 text-sm"
+              className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
             >
-              <option value="all">All Types</option>
-              <option value="scope">Scope</option>
-              <option value="note">Note</option>
-              <option value="exclusion">Exclusion</option>
-              <option value="ps_wording">Provisional Sum</option>
+              <option value="all" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">All Types</option>
+              <option value="scope" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">Scope</option>
+              <option value="note" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">Note</option>
+              <option value="exclusion" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">Exclusion</option>
+              <option value="ps_wording" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">Provisional Sum</option>
             </select>
           </div>
 

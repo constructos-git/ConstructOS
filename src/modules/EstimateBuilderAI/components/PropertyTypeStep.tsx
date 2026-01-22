@@ -84,6 +84,7 @@ export function PropertyTypeStep({ onSelect, onBack }: PropertyTypeStepProps) {
             selectedValue={undefined}
             onSelect={(value) => onSelect(value as string)}
             multiSelect={false}
+            showSettings={false}
           />
         </CardContent>
       </Card>

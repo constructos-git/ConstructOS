@@ -45,14 +45,55 @@ export interface EstimateBuilderTemplate {
 }
 
 export interface EstimateMeasurements {
+  // Basic dimensions
   externalLengthM: number;
   externalWidthM: number;
   eavesHeightM: number;
-  floorAreaM2: number;
+  ceilingHeightM?: number;
+  internalLengthM: number;
+  internalWidthM: number;
+  
+  // Areas
+  floorAreaM2: number; // External footprint
+  internalFloorAreaM2: number; // Internal floor area (minus wall thickness)
   perimeterM: number;
   externalWallAreaM2: number;
+  internalWallAreaM2: number;
+  openingsAreaM2: number;
+  netWallAreaM2: number; // External wall area minus openings
+  
+  // Roof
   roofAreaM2: number;
   roofFactor: number;
+  roofPitchDegrees?: number;
+  fasciaLengthM?: number;
+  soffitLengthM?: number;
+  bargeboardLengthM?: number;
+  rakeSoffitLengthM?: number;
+  eavesLengthM?: number;
+  ceilingInsulationAreaM2?: number;
+  
+  // Foundation
+  foundationLengthM?: number; // Foundation run (perimeter)
+  foundationWidthMM?: number;
+  foundationDepthMM?: number;
+  excavationDepthMM?: number;
+  concreteDepthMM?: number;
+  concreteVolumeM3?: number;
+  
+  // Walls below DPC
+  dpcLevelMM?: number;
+  outerSkinLengthM?: number;
+  innerSkinLengthM?: number;
+  outerSkinAreaM2?: number;
+  innerSkinAreaM2?: number;
+  brickHeightMM?: number;
+  blockHeightMM?: number;
+  cavityWidthMM?: number;
+  
+  // Knock-through
+  knockThroughWidthM?: number;
+  knockThroughHeightM?: number;
 }
 
 export interface RateSettings {
@@ -70,8 +111,13 @@ export interface EstimateBrief {
   propertyType?: string;
   alterationTypes?: (string | number | boolean)[];
   location?: string;
-  knockThrough?: boolean;
+  knockThrough?: boolean | string; // Can be true, false, or 'existing'
   knockThroughType?: string;
+  existingOpeningAction?: 'remove-and-make-good' | 'enlarge';
+  knockThroughEnlargementAmount?: number;
+  knockThroughWidthM?: number;
+  knockThroughHeightM?: number;
+  knockThroughSupport?: 'steel' | 'lintel';
   roofType?: string;
   roofSubType?: string; // warm deck, cold deck, gable, hipped, etc.
   roofCovering?: string;
@@ -79,6 +125,26 @@ export interface EstimateBrief {
   doorType?: string;
   rooflightsCount?: number;
   foundationsType?: string;
+  groundFloorType?: string;
+  wallConstructionType?: string;
+  cavitySize?: number; // millimeters
+  cavityType?: string; // 'full-fill', 'partial-fill', 'empty'
+  wallInsulationThickness?: number; // millimeters
+  residualCavity?: number; // millimeters
+  wallInsulationType?: string;
+  timberFrameInsulationType?: string;
+  timberFrameInsulationThickness?: number; // millimeters
+  fasciaType?: string;
+  fasciaDepth?: number;
+  soffitType?: string;
+  bargeboardType?: string;
+  gutterType?: string;
+  gutterSize?: string;
+  downpipeType?: string;
+  downpipeSize?: string;
+  rainwaterGoodsOther?: string;
+  floorInsulation?: boolean;
+  roofInsulation?: boolean;
   heatingType?: string;
   electricsLevel?: string;
   measurements?: EstimateMeasurements;

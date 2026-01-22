@@ -121,10 +121,10 @@ export function GenerateWOModal({
           <select
             value={pricingMode}
             onChange={(e) => setPricingMode(e.target.value as 'fixed' | 'schedule')}
-            className="w-full rounded-md border px-3 py-2"
+            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
           >
-            <option value="schedule">Schedule of Rates</option>
-            <option value="fixed">Fixed Price</option>
+            <option value="schedule" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">Schedule of Rates</option>
+            <option value="fixed" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">Fixed Price</option>
           </select>
         </div>
 

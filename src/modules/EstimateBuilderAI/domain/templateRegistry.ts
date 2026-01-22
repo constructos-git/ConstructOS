@@ -9,10 +9,68 @@ import { buildEstimateBrief } from './briefBuilder';
 const singleStoreyExtensionTemplate: EstimateBuilderTemplate = {
   id: 'single-storey-extension',
   name: 'Single Storey Extension',
-  description: 'Standard single storey rear extension with configurable roof options',
+  description: 'Standard single storey extension with configurable roof options',
   category: 'extension',
   icon: 'Home',
   steps: [
+    {
+      id: 'step-0',
+      title: 'Property Type',
+      description: 'What best describes the existing property?',
+      questions: [
+        {
+          id: 'propertyType',
+          title: 'What best describes the existing property?',
+          helpText: 'Select the type of existing property',
+          type: 'cardGrid',
+          required: true,
+          options: [
+            {
+              id: 'detached',
+              label: 'Detached',
+              icon: 'Home',
+              value: 'detached',
+              description: 'Standalone property',
+            },
+            {
+              id: 'semi-detached',
+              label: 'Semi Detached',
+              icon: 'Building2',
+              value: 'semi-detached',
+              description: 'Two properties joined together',
+            },
+            {
+              id: 'end-of-terrace',
+              label: 'End of Terrace',
+              icon: 'Home',
+              value: 'end-of-terrace',
+              description: 'End property in a row',
+            },
+            {
+              id: 'terrace',
+              label: 'Terrace',
+              icon: 'Building2',
+              value: 'terrace',
+              description: 'Middle property in a row',
+            },
+            {
+              id: 'flat',
+              label: 'Flat',
+              icon: 'Home',
+              value: 'flat',
+              description: 'Apartment or flat',
+            },
+            {
+              id: 'bungalow',
+              label: 'Bungalow',
+              icon: 'Home',
+              value: 'bungalow',
+              description: 'Single storey property',
+            },
+          ],
+        },
+      ],
+    },
     {
       id: 'step-1',
       title: 'Location',
@@ -58,550 +116,337 @@ const singleStoreyExtensionTemplate: EstimateBuilderTemplate = {
       ],
     },
     {
+      id: 'step-professional-services',
+      title: 'Professional Services',
+      description: 'Select required professional services and fees',
+      questions: [], // Handled by ProfessionalServicesModal
+    },
+    {
       id: 'step-dimensions',
       title: 'Dimensions',
       description: 'Enter the basic extension dimensions',
       questions: [], // Dimensions handled by DimensionsBlock component
     },
     {
+      id: 'step-foundations',
+      title: 'Foundations',
+      description: 'Select foundation type and dimensions',
+      questions: [], // Handled by FoundationsModal
+    },
+    {
+      id: 'step-ground-floor',
+      title: 'Ground Floor Construction',
+      description: 'Select ground floor type and construction method',
+      questions: [], // Handled by GroundFloorModal
+    },
+    {
+      id: 'step-wall-construction',
+      title: 'Wall Construction',
+      description: 'Select wall construction type, cavity details, and insulation',
+      questions: [], // Handled by WallConstructionModal
+    },
+    {
       id: 'step-2',
       title: 'Knock-Through',
       description: 'Is a knock-through required?',
-      questions: [
-        {
-          id: 'knockThrough',
-          title: 'Is a knock-through required?',
-          helpText: 'A knock-through connects the extension to the existing property',
-          type: 'cardGrid',
-          required: true,
-          options: [
-            {
-              id: 'yes',
-              label: 'Yes',
-              icon: 'Wrench',
-              value: true,
-              description: 'Knock-through is required',
-            },
-            {
-              id: 'no',
-              label: 'No',
-              icon: 'Home',
-              value: false,
-              description: 'No knock-through needed',
-            },
-          ],
-        },
-      ],
+      questions: [], // Handled by KnockThroughModal
     },
     {
       id: 'step-3',
       title: 'Knock-Through Type',
       description: 'What type of knock-through?',
-      questions: [
-        {
-          id: 'knockThroughType',
-          title: 'What type of knock-through?',
-          helpText: 'Select the type of opening you need',
-          type: 'cardGrid',
-          required: true,
-          dependencies: [
-            {
-              questionId: 'knockThrough',
-              condition: 'equals',
-              value: true,
-            },
-          ],
-          options: [
-            {
-              id: 'existing-door',
-              label: 'Existing Door',
-              icon: 'Home',
-              value: 'existing-door',
-            },
-            {
-              id: 'existing-window',
-              label: 'Existing Window',
-              icon: 'Home',
-              value: 'existing-window',
-            },
-            {
-              id: 'door-window-combo',
-              label: 'Door + Window Combo',
-              icon: 'Home',
-              value: 'door-window-combo',
-            },
-            {
-              id: 'french-doors',
-              label: 'French Doors',
-              icon: 'Home',
-              value: 'french-doors',
-            },
-            {
-              id: 'patio-sliding',
-              label: 'Patio/Sliding Doors',
-              icon: 'Home',
-              value: 'patio-sliding',
-            },
-            {
-              id: 'enlarge-opening',
-              label: 'Enlarge Existing Opening',
-              icon: 'Wrench',
-              value: 'enlarge-opening',
-            },
-            {
-              id: 'other',
-              label: 'Other',
-              icon: 'FileQuestion',
-              value: 'other',
-            },
-          ],
-        },
-      ],
+      questions: [], // Handled by KnockThroughModal
+    },
+    {
+      id: 'step-steels-structural',
+      title: 'Structural - Steels and Lintels',
+      description: 'Specify steels and lintels for knock-through and the rest of the project',
+      questions: [], // Handled by StructuralSteelsModal
     },
     {
       id: 'step-4',
       title: 'Roof Type',
       description: 'What type of roof?',
-      questions: [
-        {
-          id: 'roofType',
-          title: 'What type of roof?',
-          helpText: 'Select the roof style for your extension',
-          type: 'cardGrid',
-          required: true,
-          options: [
-            {
-              id: 'flat',
-              label: 'Flat',
-              icon: 'Layers',
-              value: 'flat',
-              description: 'Flat roof',
-            },
-            {
-              id: 'pitched',
-              label: 'Pitched',
-              icon: 'Home',
-              value: 'pitched',
-              description: 'Pitched roof',
-            },
-          ],
-        },
-        {
-          id: 'roofSubType',
-          title: 'Roof Sub-Type',
-          helpText: 'Select additional roof details',
-          type: 'cardGrid',
-          required: false,
-          dependencies: [
-            {
-              questionId: 'roofType',
-              condition: 'equals',
-              value: 'flat',
-            },
-          ],
-          options: [
-            {
-              id: 'warm-deck',
-              label: 'Warm Deck',
-              icon: 'Layers',
-              value: 'warm-deck',
-            },
-            {
-              id: 'cold-deck',
-              label: 'Cold Deck',
-              icon: 'Layers',
-              value: 'cold-deck',
-            },
-          ],
-        },
-        {
-          id: 'roofPitchedDetails',
-          title: 'Pitched Roof Details',
-          helpText: 'Select pitched roof details',
-          type: 'cardGrid',
-          required: false,
-          dependencies: [
-            {
-              questionId: 'roofType',
-              condition: 'equals',
-              value: 'pitched',
-            },
-          ],
-          options: [
-            {
-              id: 'gable',
-              label: 'Gable',
-              icon: 'Home',
-              value: 'gable',
-            },
-            {
-              id: 'hipped',
-              label: 'Hipped',
-              icon: 'Home',
-              value: 'hipped',
-            },
-            {
-              id: 'mansard',
-              label: 'Mansard',
-              icon: 'Home',
-              value: 'mansard',
-            },
-            {
-              id: 'vaulted',
-              label: 'Vaulted Ceiling',
-              icon: 'Home',
-              value: 'vaulted',
-            },
-            {
-              id: 'standard',
-              label: 'Standard Ceiling',
-              icon: 'Home',
-              value: 'standard',
-            },
-          ],
-        },
-      ],
+      questions: [], // Handled by RoofTypeModal
     },
     {
       id: 'step-5',
       title: 'Roof Coverings',
       description: 'What roof covering?',
-      questions: [
-        {
-          id: 'roofCovering',
-          title: 'What roof covering?',
-          helpText: 'Select the roof covering material',
-          type: 'cardGrid',
-          required: true,
-          dependencies: [
-            {
-              questionId: 'roofType',
-              condition: 'in',
-              value: ['flat', 'pitched'],
-            },
-          ],
-          options: [
-            // Flat roof options
-            {
-              id: 'felt',
-              label: 'Felt',
-              icon: 'Layers',
-              value: 'felt',
-              description: 'Felt roofing',
-            },
-            {
-              id: 'grp',
-              label: 'GRP',
-              icon: 'Layers',
-              value: 'grp',
-              description: 'Glass Reinforced Plastic',
-            },
-            {
-              id: 'epdm',
-              label: 'EPDM',
-              icon: 'Layers',
-              value: 'epdm',
-              description: 'EPDM rubber roofing',
-            },
-            // Pitched roof options
-            {
-              id: 'slate',
-              label: 'Slate',
-              icon: 'Home',
-              value: 'slate',
-              description: 'Slate tiles',
-            },
-            {
-              id: 'plain-tile',
-              label: 'Plain Tile',
-              icon: 'Home',
-              value: 'plain-tile',
-              description: 'Plain clay/concrete tiles',
-            },
-            {
-              id: 'interlocking-tile',
-              label: 'Interlocking Tile',
-              icon: 'Home',
-              value: 'interlocking-tile',
-              description: 'Interlocking tiles',
-            },
-          ],
-        },
-      ],
+      questions: [], // Handled by RoofCoveringsModal
+    },
+    {
+      id: 'step-insulation',
+      title: 'Insulation',
+      description: 'Select insulation requirements',
+      questions: [], // Handled by InsulationModal
+    },
+    {
+      id: 'step-fascia-soffit-rainwater',
+      title: 'Fascia, Soffit & Rainwater Goods',
+      description: 'Specify fascia, soffit, roof overhangs, and rainwater goods',
+      questions: [], // Handled by FasciaSoffitRainwaterModal
     },
     {
       id: 'step-6',
       title: 'External Wall Finish',
       description: 'What finish for the external walls?',
-      questions: [
-        {
-          id: 'wallFinish',
-          title: 'What finish for the external walls?',
-          helpText: 'Select the external wall finish',
-          type: 'cardGrid',
-          required: true,
-          options: [
-            {
-              id: 'facing-brick',
-              label: 'Facing Brick',
-              icon: 'Home',
-              value: 'facing-brick',
-              description: 'Facing brick finish',
-            },
-            {
-              id: 'render',
-              label: 'Render',
-              icon: 'Home',
-              value: 'render',
-              description: 'Rendered finish',
-            },
-            {
-              id: 'cladding',
-              label: 'Cladding',
-              icon: 'Home',
-              value: 'cladding',
-              description: 'Cladding finish',
-            },
-            {
-              id: 'other',
-              label: 'Other',
-              icon: 'FileQuestion',
-              value: 'other',
-              description: 'Other finish',
-            },
-          ],
-        },
-      ],
+      questions: [], // Handled by ExternalWallFinishModal
     },
     {
       id: 'step-7',
       title: 'Rear Opening/Doors',
       description: 'What type of doors for the rear opening?',
-      questions: [
-        {
-          id: 'doorType',
-          title: 'What type of doors for the rear opening?',
-          helpText: 'Select the door type',
-          type: 'cardGrid',
-          required: true,
-          options: [
-            {
-              id: 'bifold',
-              label: 'Bifold',
-              icon: 'Home',
-              value: 'bifold',
-              description: 'Bifold doors',
-            },
-            {
-              id: 'sliding',
-              label: 'Sliding',
-              icon: 'Home',
-              value: 'sliding',
-              description: 'Sliding doors',
-            },
-            {
-              id: 'french',
-              label: 'French',
-              icon: 'Home',
-              value: 'french',
-              description: 'French doors',
-            },
-            {
-              id: 'patio',
-              label: 'Patio',
-              icon: 'Home',
-              value: 'patio',
-              description: 'Patio doors',
-            },
-            {
-              id: 'none',
-              label: 'None',
-              icon: 'Home',
-              value: 'none',
-              description: 'No rear doors',
-            },
-          ],
-        },
-      ],
+      questions: [], // Handled by DoorsModal
     },
     {
       id: 'step-8',
       title: 'Rooflights',
       description: 'How many rooflights?',
-      questions: [
-        {
-          id: 'rooflightsCount',
-          title: 'How many rooflights?',
-          helpText: 'Select the number of rooflights',
-          type: 'cardGrid',
-          required: true,
-          options: [
-            {
-              id: '0',
-              label: '0',
-              icon: 'Home',
-              value: 0,
-              description: 'No rooflights',
-            },
-            {
-              id: '1',
-              label: '1',
-              icon: 'Home',
-              value: 1,
-              description: 'One rooflight',
-            },
-            {
-              id: '2',
-              label: '2',
-              icon: 'Home',
-              value: 2,
-              description: 'Two rooflights',
-            },
-            {
-              id: '3',
-              label: '3',
-              icon: 'Home',
-              value: 3,
-              description: 'Three rooflights',
-            },
-            {
-              id: '4-plus',
-              label: '4+',
-              icon: 'Home',
-              value: 4,
-              description: 'Four or more rooflights',
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: 'step-9',
-      title: 'Foundations Type',
-      description: 'What type of foundations?',
-      questions: [
-        {
-          id: 'foundationsType',
-          title: 'What type of foundations?',
-          helpText: 'Select the foundations type',
-          type: 'cardGrid',
-          required: true,
-          options: [
-            {
-              id: 'standard-strip',
-              label: 'Standard Strip',
-              icon: 'Home',
-              value: 'standard-strip',
-              description: 'Standard strip foundations',
-            },
-            {
-              id: 'trench-fill',
-              label: 'Trench Fill',
-              icon: 'Home',
-              value: 'trench-fill',
-              description: 'Trench fill foundations',
-            },
-            {
-              id: 'piled',
-              label: 'Piled (Provisional Sum)',
-              icon: 'Home',
-              value: 'piled',
-              description: 'Piled foundations - provisional sum',
-            },
-            {
-              id: 'unknown',
-              label: 'Unknown (Provisional Sum)',
-              icon: 'FileQuestion',
-              value: 'unknown',
-              description: 'Unknown - provisional sum',
-            },
-          ],
-        },
-      ],
+      questions: [], // Handled by RooflightsModal
     },
     {
       id: 'step-10',
       title: 'Heating Approach',
       description: 'How will heating be provided?',
+      questions: [], // Handled by HeatingModal
+    },
+    {
+      id: 'step-11',
+      title: 'Electrics Specification',
+      description: 'What level of electrical specification?',
+      questions: [], // Handled by ElectricsModal
+    },
+    {
+      id: 'step-measurements',
+      title: 'Measurements',
+      description: 'Review and adjust detailed measurements',
+      questions: [], // Measurements handled by MeasurementsBlock component
+    },
+    {
+      id: 'step-0',
+      title: 'Property Type',
+      description: 'What best describes the existing property?',
       questions: [
         {
-          id: 'heatingType',
-          title: 'How will heating be provided?',
-          helpText: 'Select the heating approach',
+          id: 'propertyType',
+          title: 'What best describes the existing property?',
+          helpText: 'Select the type of existing property',
           type: 'cardGrid',
           required: true,
           options: [
             {
-              id: 'extend-radiators',
-              label: 'Extend Radiators',
+              id: 'detached',
+              label: 'Detached',
               icon: 'Home',
-              value: 'extend-radiators',
-              description: 'Extend existing radiator system',
+              value: 'detached',
+              description: 'Standalone property',
             },
             {
-              id: 'wet-ufh',
-              label: 'Wet UFH',
-              icon: 'Home',
-              value: 'wet-ufh',
-              description: 'Wet underfloor heating',
+              id: 'semi-detached',
+              label: 'Semi Detached',
+              icon: 'Building2',
+              value: 'semi-detached',
+              description: 'Two properties joined together',
             },
             {
-              id: 'electric-ufh',
-              label: 'Electric UFH',
+              id: 'end-of-terrace',
+              label: 'End of Terrace',
               icon: 'Home',
-              value: 'electric-ufh',
-              description: 'Electric underfloor heating',
+              value: 'end-of-terrace',
+              description: 'End property in a row',
             },
             {
-              id: 'none-existing',
-              label: 'None/Existing',
+              id: 'terrace',
+              label: 'Terrace',
+              icon: 'Building2',
+              value: 'terrace',
+              description: 'Middle property in a row',
+            },
+            {
+              id: 'flat',
+              label: 'Flat',
               icon: 'Home',
-              value: 'none-existing',
-              description: 'No new heating or use existing',
+              value: 'flat',
+              description: 'Apartment or flat',
+            },
+            {
+              id: 'bungalow',
+              label: 'Bungalow',
+              icon: 'Home',
+              value: 'bungalow',
+              description: 'Single storey property',
             },
           ],
         },
       ],
     },
     {
-      id: 'step-11',
-      title: 'Electrics Specification',
-      description: 'What level of electrical specification?',
+      id: 'step-1',
+      title: 'Location',
+      description: 'Where is the extension being built?',
       questions: [
         {
-          id: 'electricsLevel',
-          title: 'What level of electrical specification?',
-          helpText: 'Select the electrical specification level',
+          id: 'location',
+          title: 'Where is the extension being built?',
+          helpText: 'Select the location of the extension',
           type: 'cardGrid',
           required: true,
           options: [
             {
-              id: 'basic',
-              label: 'Basic',
+              id: 'rear',
+              label: 'Rear',
               icon: 'Home',
-              value: 'basic',
-              description: 'Basic electrical installation',
+              value: 'rear',
+              description: 'Rear extension',
             },
             {
-              id: 'standard',
-              label: 'Standard',
+              id: 'side',
+              label: 'Side',
               icon: 'Home',
-              value: 'standard',
-              description: 'Standard electrical installation',
+              value: 'side',
+              description: 'Side extension',
             },
             {
-              id: 'high-spec',
-              label: 'High Spec',
+              id: 'front',
+              label: 'Front',
               icon: 'Home',
-              value: 'high-spec',
-              description: 'High specification electrical installation',
+              value: 'front',
+              description: 'Front extension',
+            },
+            {
+              id: 'wrap-around',
+              label: 'Wrap Around',
+              icon: 'Home',
+              value: 'wrap-around',
+              description: 'Wrap around extension',
             },
           ],
         },
       ],
     },
+    {
+      id: 'step-site-conditions',
+      title: 'Site Conditions and Access',
+      description: 'Configure site access, constraints, existing services, and ground conditions',
+      questions: [], // Handled by SiteConditionsModal
+    },
+    {
+      id: 'step-scaffolding',
+      title: 'Scaffolding',
+      description: 'Configure scaffolding requirements',
+      questions: [], // Handled by ScaffoldingModal
+    },
+    {
+      id: 'step-health-safety-welfare',
+      title: 'Health & Safety & Welfare',
+      description: 'Configure health, safety, and welfare provisions',
+      questions: [], // Handled by HealthSafetyWelfareModal
+    },
+    {
+      id: 'step-dimensions',
+      title: 'Dimensions',
+      description: 'Enter the basic extension dimensions',
+      questions: [], // Dimensions handled by DimensionsBlock component
+    },
+    {
+      id: 'step-foundations',
+      title: 'Foundations',
+      description: 'Select foundation type and dimensions',
+      questions: [], // Handled by FoundationsModal
+    },
+    {
+      id: 'step-ground-floor',
+      title: 'Ground Floor Construction',
+      description: 'Select ground floor type and construction method',
+      questions: [], // Handled by GroundFloorModal
+    },
+    {
+      id: 'step-2',
+      title: 'Knock-Through',
+      description: 'Is a knock-through required?',
+      questions: [], // Handled by KnockThroughModal
+    },
+    {
+      id: 'step-3',
+      title: 'Knock-Through Type',
+      description: 'What type of knock-through?',
+      questions: [], // Handled by KnockThroughModal
+    },
+    {
+      id: 'step-steels-structural',
+      title: 'Structural - Steels and Lintels',
+      description: 'Specify steels and lintels for knock-through and the rest of the project',
+      questions: [], // Handled by StructuralSteelsModal
+    },
+    {
+      id: 'step-4',
+      title: 'Roof Type',
+      description: 'What type of roof?',
+      questions: [], // Handled by RoofTypeModal
+    },
+    {
+      id: 'step-5',
+      title: 'Roof Coverings',
+      description: 'What roof covering?',
+      questions: [], // Handled by RoofCoveringsModal
+    },
+    {
+      id: 'step-insulation',
+      title: 'Insulation',
+      description: 'Select insulation requirements',
+      questions: [], // Handled by InsulationModal
+    },
+    {
+      id: 'step-fascia-soffit-rainwater',
+      title: 'Fascia, Soffit & Rainwater Goods',
+      description: 'Specify fascia, soffit, roof overhangs, and rainwater goods',
+      questions: [], // Handled by FasciaSoffitRainwaterModal
+    },
+    {
+      id: 'step-wall-construction',
+      title: 'Wall Construction',
+      description: 'Select wall construction type, cavity details, and insulation',
+      questions: [], // Handled by WallConstructionModal
+    },
+    {
+      id: 'step-6',
+      title: 'External Wall Finish',
+      description: 'What finish for the external walls?',
+      questions: [], // Handled by ExternalWallFinishModal
+    },
+    {
+      id: 'step-7',
+      title: 'Rear Opening/Doors',
+      description: 'What type of doors for the rear opening?',
+      questions: [], // Handled by DoorsModal
+    },
+    {
+      id: 'step-8',
+      title: 'Rooflights',
+      description: 'How many rooflights?',
+      questions: [], // Handled by RooflightsModal
+    },
+    {
+      id: 'step-10',
+      title: 'Heating Approach',
+      description: 'How will heating be provided?',
+      questions: [], // Handled by HeatingModal
+    },
+    {
+      id: 'step-11',
+      title: 'Electrics Specification',
+      description: 'What level of electrical specification?',
+      questions: [], // Handled by ElectricsModal
+    },
+    {
+      id: 'step-measurements',
+      title: 'Measurements',
+      description: 'Review and adjust detailed measurements',
+      questions: [], // Measurements handled by MeasurementsBlock component
+    },
   ],
-  promptBuilder: (answers: Record<string, any>) => {
+  promptBuilder: (answers: Record<string, unknown>) => {
     return buildEstimateBrief('single-storey-extension', answers);
   },
 };

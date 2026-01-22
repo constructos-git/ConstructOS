@@ -23,7 +23,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
             'flex-1 transition-all duration-300 min-w-0',
             isCollapsed ? 'ml-16' : 'ml-64'
           )}
-          style={{ width: '100%', maxWidth: '100%', overflowX: 'hidden' }}
+          style={{ width: '100%', maxWidth: '100%', overflowX: 'hidden', overflowY: 'visible', position: 'relative' }}
         >
           <Header />
           <main className="p-6 relative" style={{ width: '100%', maxWidth: '100%', overflowX: 'hidden', zIndex: 1 }}>

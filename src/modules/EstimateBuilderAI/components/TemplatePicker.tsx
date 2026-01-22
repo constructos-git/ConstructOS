@@ -37,6 +37,7 @@ interface TemplatePickerProps {
 export function TemplatePicker({ onSelect, onCancel }: TemplatePickerProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [favorites, setFavorites] = useState<Set<string>>(() => {
     const stored = localStorage.getItem('estimateBuilderAI_favorites');
     return stored ? new Set(JSON.parse(stored)) : new Set();
@@ -58,8 +59,12 @@ export function TemplatePicker({ onSelect, onCancel }: TemplatePickerProps) {
       );
     }
     
+    if (showFavoritesOnly) {
+      filtered = filtered.filter((t) => favorites.has(t.id));
+    }
+    
     return filtered;
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategory, searchQuery, showFavoritesOnly, favorites]);
   
   const toggleFavorite = (templateId: string) => {
     const newFavorites = new Set(favorites);
@@ -96,13 +101,29 @@ export function TemplatePicker({ onSelect, onCancel }: TemplatePickerProps) {
       </div>
 
       {/* Category Filter */}
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex gap-2 flex-wrap items-center">
+        <Button
+          variant={showFavoritesOnly ? 'primary' : 'secondary'}
+          size="sm"
+          onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+          className="flex items-center gap-2"
+        >
+          <Star
+            className={`h-4 w-4 ${
+              showFavoritesOnly ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'
+            }`}
+          />
+          Favorites
+        </Button>
         {categories.map((category) => (
           <Button
             key={category}
             variant={selectedCategory === category ? 'primary' : 'secondary'}
             size="sm"
-            onClick={() => setSelectedCategory(category)}
+            onClick={() => {
+              setSelectedCategory(category);
+              setShowFavoritesOnly(false);
+            }}
           >
             {category === 'all' ? 'All' : category.charAt(0).toUpperCase() + category.slice(1)}
           </Button>
